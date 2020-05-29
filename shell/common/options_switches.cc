@@ -28,6 +28,7 @@ const char kMaximizable[] = "maximizable";
 const char kFullScreenable[] = "fullscreenable";
 const char kClosable[] = "closable";
 const char kFullscreen[] = "fullscreen";
+const char kTrafficLightPosition[] = "trafficLightPosition";
 
 // Whether the window should show in taskbar.
 const char kSkipTaskbar[] = "skipTaskbar";
@@ -110,9 +111,6 @@ const char kPreloadURL[] = "preloadURL";
 // Enable the node integration.
 const char kNodeIntegration[] = "nodeIntegration";
 
-// Enable the remote module
-const char kEnableRemoteModule[] = "enableRemoteModule";
-
 // Enable context isolation of Electron APIs and preload script
 const char kContextIsolation[] = "contextIsolation";
 
@@ -176,6 +174,16 @@ const char kWebGL[] = "webgl";
 // navigation.
 const char kNavigateOnDragDrop[] = "navigateOnDragDrop";
 
+#if BUILDFLAG(ENABLE_BUILTIN_SPELLCHECKER)
+const char kSpellcheck[] = "spellcheck";
+#endif
+
+#if BUILDFLAG(ENABLE_REMOTE_MODULE)
+const char kEnableRemoteModule[] = "enableRemoteModule";
+#endif
+
+const char kEnableWebSQL[] = "enableWebSQL";
+
 }  // namespace options
 
 namespace switches {
@@ -219,12 +227,13 @@ const char kAppUserModelId[] = "app-user-model-id";
 // The application path
 const char kAppPath[] = "app-path";
 
+const char kEnableApiFilteringLogging[] = "enable-api-filtering-logging";
+
 // The command line switch versions of the options.
 const char kBackgroundColor[] = "background-color";
 const char kPreloadScript[] = "preload";
 const char kPreloadScripts[] = "preload-scripts";
 const char kNodeIntegration[] = "node-integration";
-const char kDisableRemoteModule[] = "disable-remote-module";
 const char kContextIsolation[] = "context-isolation";
 const char kGuestInstanceID[] = "guest-instance-id";
 const char kOpenerID[] = "opener-id";
@@ -234,6 +243,7 @@ const char kNativeWindowOpen[] = "native-window-open";
 const char kWebviewTag[] = "webview-tag";
 const char kDisableElectronSiteInstanceOverrides[] =
     "disable-electron-site-instance-overrides";
+const char kEnableNodeLeakageInRenderers[] = "enable-node-leakage-in-renderers";
 
 // Command switch passed to renderer process to control nodeIntegration.
 const char kNodeIntegrationInWorker[] = "node-integration-in-worker";
@@ -241,6 +251,10 @@ const char kNodeIntegrationInWorker[] = "node-integration-in-worker";
 // Command switch passed to renderer process to control whether node
 // environments will be created in sub-frames.
 const char kNodeIntegrationInSubFrames[] = "node-integration-in-subframes";
+
+// Command switch passed to render process to control whether WebSQL api
+// is allowed.
+const char kEnableWebSQL[] = "enable-websql";
 
 // Widevine options
 // Path to Widevine CDM binaries.
@@ -263,6 +277,16 @@ const char kAuthNegotiateDelegateWhitelist[] =
 
 // If set, include the port in generated Kerberos SPNs.
 const char kEnableAuthNegotiatePort[] = "enable-auth-negotiate-port";
+
+#if BUILDFLAG(ENABLE_BUILTIN_SPELLCHECKER)
+const char kEnableSpellcheck[] = "enable-spellcheck";
+#endif
+
+#if BUILDFLAG(ENABLE_REMOTE_MODULE)
+const char kEnableRemoteModule[] = "enable-remote-module";
+#endif
+
+const char kGlobalCrashKeys[] = "global-crash-keys";
 
 }  // namespace switches
 

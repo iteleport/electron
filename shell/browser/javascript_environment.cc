@@ -4,18 +4,25 @@
 
 #include "shell/browser/javascript_environment.h"
 
+#include <memory>
+
 #include <string>
 
 #include "base/command_line.h"
-#include "base/message_loop/message_loop.h"
+#include "base/message_loop/message_loop_current.h"
 #include "base/task/thread_pool/initialization_util.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "content/public/common/content_switches.h"
 #include "gin/array_buffer.h"
 #include "gin/v8_initializer.h"
 #include "shell/browser/microtasks_runner.h"
+#include "shell/common/gin_helper/cleaned_up_at_exit.h"
 #include "shell/common/node_includes.h"
 #include "tracing/trace_event.h"
+
+namespace {
+v8::Isolate* g_isolate;
+}
 
 namespace electron {
 
@@ -27,13 +34,24 @@ JavascriptEnvironment::JavascriptEnvironment(uv_loop_t* event_loop)
                       gin::IsolateHolder::IsolateType::kUtility,
                       gin::IsolateHolder::IsolateCreationMode::kNormal,
                       isolate_),
-      isolate_scope_(isolate_),
-      locker_(isolate_),
-      handle_scope_(isolate_),
-      context_(isolate_, v8::Context::New(isolate_)),
-      context_scope_(v8::Local<v8::Context>::New(isolate_, context_)) {}
+      locker_(isolate_) {
+  isolate_->Enter();
+  v8::HandleScope scope(isolate_);
+  auto context = node::NewContext(isolate_);
+  context_ = v8::Global<v8::Context>(isolate_, context);
+  context->Enter();
+}
 
-JavascriptEnvironment::~JavascriptEnvironment() = default;
+JavascriptEnvironment::~JavascriptEnvironment() {
+  {
+    v8::Locker locker(isolate_);
+    v8::HandleScope scope(isolate_);
+    gin_helper::CleanedUpAtExit::DoCleanup();
+    context_.Get(isolate_)->Exit();
+  }
+  isolate_->Exit();
+  g_isolate = nullptr;
+}
 
 v8::Isolate* JavascriptEnvironment::Initialize(uv_loop_t* event_loop) {
   auto* cmd = base::CommandLine::ForCurrentProcess();
@@ -60,13 +78,20 @@ v8::Isolate* JavascriptEnvironment::Initialize(uv_loop_t* event_loop) {
 
   v8::Isolate* isolate = v8::Isolate::Allocate();
   platform_->RegisterIsolate(isolate, event_loop);
+  g_isolate = isolate;
 
   return isolate;
 }
 
+// static
+v8::Isolate* JavascriptEnvironment::GetIsolate() {
+  CHECK(g_isolate);
+  return g_isolate;
+}
+
 void JavascriptEnvironment::OnMessageLoopCreated() {
   DCHECK(!microtasks_runner_);
-  microtasks_runner_.reset(new MicrotasksRunner(isolate()));
+  microtasks_runner_ = std::make_unique<MicrotasksRunner>(isolate());
   base::MessageLoopCurrent::Get()->AddTaskObserver(microtasks_runner_.get());
 }
 

@@ -43,8 +43,7 @@ class OffScreenWebContentsView : public content::WebContentsView,
   gfx::NativeView GetNativeView() const override;
   gfx::NativeView GetContentNativeView() const override;
   gfx::NativeWindow GetTopLevelNativeWindow() const override;
-  void GetContainerBounds(gfx::Rect* out) const override;
-  void SizeContents(const gfx::Size& size) override;
+  gfx::Rect GetContainerBounds() const override;
   void Focus() override;
   void SetInitialFocus() override;
   void StoreFocus() override;
@@ -52,15 +51,12 @@ class OffScreenWebContentsView : public content::WebContentsView,
   void FocusThroughTabTraversal(bool reverse) override;
   content::DropData* GetDropData() const override;
   gfx::Rect GetViewBounds() const override;
-  void CreateView(const gfx::Size& initial_size,
-                  gfx::NativeView context) override;
+  void CreateView(gfx::NativeView context) override;
   content::RenderWidgetHostViewBase* CreateViewForWidget(
-      content::RenderWidgetHost* render_widget_host,
-      bool is_guest_view_hack) override;
+      content::RenderWidgetHost* render_widget_host) override;
   content::RenderWidgetHostViewBase* CreateViewForChildWidget(
       content::RenderWidgetHost* render_widget_host) override;
   void SetPageTitle(const base::string16& title) override;
-  void RenderViewCreated(content::RenderViewHost* host) override;
   void RenderViewReady() override;
   void RenderViewHostChanged(content::RenderViewHost* old_host,
                              content::RenderViewHost* new_host) override;

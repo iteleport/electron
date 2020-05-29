@@ -16,7 +16,11 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-import urllib2
+# Python 3 / 2 compat import
+try:
+  from urllib.request import urlopen
+except ImportError:
+  from urllib2 import urlopen
 import zipfile
 
 from lib.config import is_verbose_mode, PLATFORM
@@ -69,8 +73,12 @@ def download(text, url, path):
       ssl._create_default_https_context = ssl._create_unverified_context
 
     print("Downloading %s to %s" % (url, path))
-    web_file = urllib2.urlopen(url)
-    file_size = int(web_file.info().getheaders("Content-Length")[0])
+    web_file = urlopen(url)
+    info = web_file.info()
+    if hasattr(info, 'getheader'):
+      file_size = int(info.getheaders("Content-Length")[0])
+    else:
+      file_size = int(info.get("Content-Length")[0])
     downloaded_size = 0
     block_size = 4096
 
@@ -112,10 +120,11 @@ def extract_zip(zip_path, destination):
 def make_zip(zip_file_path, files, dirs):
   safe_unlink(zip_file_path)
   if sys.platform == 'darwin':
-    files += dirs
-    execute(['zip', '-r', '-y', zip_file_path] + files)
+    allfiles = files + dirs
+    execute(['zip', '-r', '-y', zip_file_path] + allfiles)
   else:
-    zip_file = zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED)
+    zip_file = zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED,
+                               allowZip64=True)
     for filename in files:
       zip_file.write(filename, filename)
     for dirname in dirs:
@@ -251,6 +260,7 @@ def get_buildtools_executable(name):
   buildtools = os.path.realpath(os.path.join(ELECTRON_DIR, '..', 'buildtools'))
   chromium_platform = {
     'darwin': 'mac',
+    'linux': 'linux64',
     'linux2': 'linux64',
     'win32': 'win',
   }[sys.platform]

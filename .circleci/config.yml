@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   upload-to-s3:
     type: string
-    default: '1'
+    default: '0'
 
   run-lint:
     type: boolean
@@ -73,7 +73,7 @@ machine-linux-xlarge: &machine-linux-xlarge
 
 machine-linux-2xlarge: &machine-linux-2xlarge
   <<: *docker-image
-  resource_class: 2xlarge+
+  resource_class: xlarge
 
 machine-mac: &machine-mac
   macos:
@@ -138,7 +138,7 @@ env-enable-sccache: &env-enable-sccache
   USE_SCCACHE: true
 
 env-send-slack-notifications: &env-send-slack-notifications
-  NOTIFY_SLACK: true
+  NOTIFY_SLACK: false
   
 env-global: &env-global
   ELECTRON_OUT_DIR: Default
@@ -149,11 +149,11 @@ env-linux-medium: &env-linux-medium
 
 env-linux-2xlarge: &env-linux-2xlarge
   <<: *env-global
-  NUMBER_OF_NINJA_PROCESSES: 34
+  NUMBER_OF_NINJA_PROCESSES: 6
 
 env-linux-2xlarge-release: &env-linux-2xlarge-release
   <<: *env-global
-  NUMBER_OF_NINJA_PROCESSES: 16
+  NUMBER_OF_NINJA_PROCESSES: 6
 
 env-machine-mac: &env-machine-mac
   <<: *env-global
